@@ -1,1 +1,25 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Presensi Wajah</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistem Presensi Wajah</h1>
+        <p>Arahkan wajah Anda ke kamera.</p>
+        <div class="video-container">
+            <video id="video" width="720" height="560" autoplay muted></video>
+        </div>
+        <div class="action-buttons">
+            <button id="clockInBtn">Absen Masuk</button>
+            <button id="clockOutBtn">Absen Pulang</button>
+        </div>
+        <div id="status">Status: Menunggu kamera...</div>
+    </div>
+</body>
+</html>
