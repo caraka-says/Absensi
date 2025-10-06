@@ -1,68 +1,44 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+const video = document.getElementById('video');
+const statusDiv = document.getElementById('status');
+const clockInBtn = document.getElementById('clockInBtn');
+Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+]).then(startWebcam);
+
+async function startWebcam() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+        statusDiv.textContent = "Status: Kamera Aktif. Silakan posisikan wajah.";
+    } catch (err) {
+        console.error("Error accessing webcam: ", err);
+        statusDiv.textContent = "Error: Tidak dapat mengakses kamera.";
+    }
 }
 
-.container {
-    text-align: center;
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+video.addEventListener('play', () => {
+    const canvas = faceapi.createCanvasFromMedia(video);
+    document.querySelector('.video-container').append(canvas);
+    const displaySize = { width: video.width, height: video.height };
+    faceapi.matchDimensions(canvas, displaySize);
 
-h1 {
-    margin-top: 0;
-    color: #1a73e8;
-}
+    setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        faceapi.draw.drawDetections(canvas, resizedDetections);
+        
+        if (detections.length > 0) {
+            statusDiv.textContent = "Status: Wajah Terdeteksi!";
+        } else {
+            statusDiv.textContent = "Status: Tidak ada wajah terdeteksi.";
+        }
 
-.video-container {
-    position: relative;
-    margin: 20px auto;
-    width: 720px;
-    height: 560px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    }, 100);
+});
 
-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.action-buttons button {
-    padding: 12px 25px;
-    font-size: 16px;
-    margin: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: #1a73e8;
-    color: white;
-    transition: background-color 0.3s;
-}
-
-.action-buttons button:hover {
-    background-color: #155ab6;
-}
-
-#status {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #555;
-}
+clockInBtn.addEventListener('click', () => {
+    alert("Tombol Absen Masuk Diklik! Logika verifikasi akan dijalankan di sini.");
+});
